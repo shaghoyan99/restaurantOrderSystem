@@ -57,9 +57,7 @@ public class CustomerService {
 
     public List<Customer> getAllCustomers() {
         List<Customer> customerList = new ArrayList<>();
-
         String sql = "SELECT * FROM customer";
-
         try(Statement statement = connection.createStatement();) {
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
@@ -70,6 +68,7 @@ public class CustomerService {
                 customer.setEmail(resultSet.getString("email"));
                 customerList.add(customer);
             }
+            return  customerList;
         } catch (SQLException e) {
             System.err.println("SQLException: " + e.getMessage());
         }

@@ -19,7 +19,7 @@ public class OrderService {
     private final Connection connection = DBConnectionProvider.getInstance().getConnection();
     private final CustomerService customerService = new CustomerService();
 
-    public void addOrder(Order order) {
+    public Order addOrder(Order order) {
         String query = "INSERT INTO orders (customer_id, total_price, status) VALUES (?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);) {
@@ -31,8 +31,39 @@ public class OrderService {
             if (resultSet.next()) {
                 order.setId(resultSet.getInt(1));
             }
+            return order;
         } catch (SQLException e) {
             System.err.println("Error adding order" + e.getMessage());
+        }
+        return null;
+    }
+
+    public Order getOrderById(int id) {
+        String query = "SELECT * FROM orders WHERE id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                Order order = new Order();
+                order.setId(resultSet.getInt(1));
+                order.setStatus(Status.valueOf(resultSet.getString(2)));
+                order.setCustomer(customerService.getCustomerById(resultSet.getInt(3)));
+                order.setTotalPrice(resultSet.getDouble(4));
+                return order;
+            }
+        }catch (SQLException e){
+            System.out.println("Error getting order by id" + e.getMessage());
+        }
+        return null;
+    }
+
+    public void changeOrderTotalPrice(double totalPrice) {
+        String query = "UPDATE orders SET total_price = ? WHERE id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setDouble(1, totalPrice);
+            preparedStatement.executeUpdate();
+        }catch (SQLException e){
+            System.out.println("Error changing order to total price" + e.getMessage());
         }
     }
 
@@ -82,6 +113,7 @@ public class OrderService {
                 order.setStatus(Status.valueOf(resultSet.getString("status")));
                 orderList.add(order);
             }
+            return orderList;
         } catch (SQLException e) {
             System.err.println("Error getting orders" + e.getMessage());
         }

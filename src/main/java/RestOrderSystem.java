@@ -1,8 +1,14 @@
 import model.Category;
+import model.Customer;
 import model.Dish;
+import model.Order;
+import model.OrderItem;
+import model.Status;
 import service.CustomerService;
 import service.DishService;
+import service.OrderItemService;
 import service.OrderService;
+import util.CheckEmailUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +20,7 @@ public class RestOrderSystem implements Commands {
     private static final Scanner scanner = new Scanner(System.in);
     private static final OrderService orderService = new OrderService();
     private static final DishService dishService = new DishService();
+    private static final OrderItemService  orderItemService = new OrderItemService();
 
 
     public static void main(String[] args) {
@@ -33,7 +40,7 @@ public class RestOrderSystem implements Commands {
                 case PRINT_ALL_ORDERS -> printAllOrders();
                 case PRINT_ALL_ORDERS_BY_CUSTOMER -> printAllOrderByCustomer();
                 case ORDER_INFORMATION -> printOrderInformation();
-                case CHANGE_ORDER_STATUS -> changeOrderStatus();
+                case CHANGE_ORDER_STATUS -> updateOrderStatus();
                 case PRINT_MENU_BY_CATEGORY -> printRestaurantMenuByCategory();
                 default -> System.out.println("Invalid command" + command);
             }
@@ -41,29 +48,122 @@ public class RestOrderSystem implements Commands {
     }
 
     private static void printRestaurantMenuByCategory() {
+        Commands.printMenuCategory();
+        String category = scanner.nextLine();
+        List<Dish> dishesByCategory = dishService.getDishesByCategory(Category.valueOf(category));
+        System.out.println(dishesByCategory);
     }
 
-    private static void changeOrderStatus() {
+    private static void updateOrderStatus() {
+        List<Order> orders = orderService.getOrders();
+        if (!orders.isEmpty()) {
+            System.out.println("Please input order id: ");
+            System.out.println(orders);
+            int orderId = Integer.parseInt(scanner.nextLine());
+            Order orderById = orderService.getOrderById(orderId);
+            Status status = orderById.getStatus();
+            switch (status) {
+                case PENDING -> orderById.setStatus(Status.PREPARING);
+                case PREPARING -> orderById.setStatus(Status.READY);
+                case READY -> orderById.setStatus(Status.DELIVERED);
+                case DELIVERED -> System.out.println("Order has been successfully delivered!");
+            }
+            orderService.changeOrderStatus(orderById);
+            System.out.println("Status updated to: " + orderById.getStatus());
+        }else {
+            System.out.println("Orders is empty!");
+        }
     }
 
     private static void printOrderInformation() {
+
     }
 
     private static void printAllOrderByCustomer() {
+        List<Customer> allCustomers = customerService.getAllCustomers();
+        if (!allCustomers.isEmpty()) {
+            System.out.println("Please enter the customer id:");
+            System.out.println(allCustomers);
+            int customerId  = Integer.parseInt(scanner.nextLine());
+            List<Order> ordersByCustomer = orderService.getOrdersByCustomer(allCustomers.get(customerId));
+            System.out.println(ordersByCustomer);
+        }else {
+            System.out.println("No customer found");
+        }
     }
 
     private static void printAllOrders() {
+        List<Order> orders = orderService.getOrders();
+        if (!orders.isEmpty()) {
+            System.out.println(orders);
+        }else  {
+            System.out.println("No orders found");
+        }
     }
 
     private static void creatNewOrder() {
-
+        List<Customer> allCustomers = customerService.getAllCustomers();
+        List<Dish> allDishes = dishService.getAllDishes();
+        if (!allCustomers.isEmpty() || !allDishes.isEmpty()) {
+            System.out.println(allCustomers);
+            System.out.println("Please enter the customer ID");
+            int customerId = Integer.parseInt(scanner.nextLine());
+            Order order = new Order();
+            order.setCustomer(customerService.getCustomerById(customerId));
+            order.setTotalPrice(0);
+            order.setStatus(Status.PENDING);
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrder(orderService.addOrder(order));
+            System.out.println("Please input dish id: ");
+            int dishId = Integer.parseInt(scanner.nextLine());
+            Dish dishById = dishService.getDishById(dishId);
+            orderItem.setDish(dishById);
+            System.out.println("Please input quantity: ");
+            int quantity = Integer.parseInt(scanner.nextLine());
+            orderItem.setQuantity(quantity);
+            orderItem.setPrice(dishById.getPrice());
+            orderItemService.addOrderItem(orderItem);
+            double totalPrice = quantity * orderItem.getPrice();
+            orderService.changeOrderTotalPrice(totalPrice);
+            System.out.println("Order has been created");
+        }else {
+            System.out.println("Customer or Dish not found");
+        }
     }
 
     private static void printCustomers() {
+        List<Customer> allCustomers = customerService.getAllCustomers();
+        if (!allCustomers.isEmpty()) {
+            System.out.println(allCustomers);
+        }else  {
+            System.out.println("There are no customers in the system");
+        }
     }
 
     private static void addCustomer() {
+        System.out.println("Please input customer name:");
+        String name = scanner.nextLine();
+        System.out.println("Please input customer phone");
+        String phone = scanner.nextLine();
 
+        String email = "";
+        boolean isEmailValid = false;
+        do {
+            System.out.println("Please input customer email");
+            email = scanner.nextLine();
+            try {
+                CheckEmailUtil.isValidEmail(email);
+                isEmailValid = true;
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+        } while (!isEmailValid);
+
+        Customer customer = new Customer();
+        customer.setName(name);
+        customer.setPhone(phone);
+        customer.setEmail(email);
+        customerService.addCustomer(customer);
     }
 
     private static Optional<Dish> getDishById() {

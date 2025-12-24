@@ -2,6 +2,9 @@ import static model.Category.APPETIZER;
 import static model.Category.DESSERT;
 import static model.Category.DRINK;
 import static model.Category.MAIN;
+import static model.Status.DELIVERED;
+import static model.Status.PREPARING;
+import static model.Status.READY;
 
 public interface Commands {
 
@@ -40,6 +43,7 @@ public interface Commands {
         System.out.println("Please input " + DESSERT.getCode() + " for " + DESSERT);
         System.out.println("Please input " + DRINK.getCode() + " for " + DRINK);
     }
+
 
 
 }
