@@ -14,6 +14,8 @@ import java.sql.Statement;
 public class OrderItemService {
 
     private final Connection connection = DBConnectionProvider.getInstance().getConnection();
+    private final DishService dishService = new DishService();
+    private final OrderService orderService = new OrderService();
 
     public void addOrderItem(OrderItem orderItem) {
         String query = "INSERT INTO order_items (order_id, dish_id,quantity,price) VALUES (?, ?, ?, ?)";
@@ -31,6 +33,25 @@ public class OrderItemService {
         } catch (SQLException e) {
             System.out.println("Error while inserting OrderItem" + e.getMessage());
         }
+    }
+
+    public OrderItem getOrderItem(int orderId) {
+        String query = "SELECT * FROM order_items WHERE order_id = ?";
+        try (Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(query);
+            if (resultSet.next()) {
+                OrderItem orderItem = new OrderItem();
+                orderItem.setId(resultSet.getInt(1));
+                orderItem.setOrder(orderService.getOrderById(resultSet.getInt(2)));
+                orderItem.setDish(dishService.getDishById(resultSet.getInt(3)));
+                orderItem.setQuantity(resultSet.getInt(4));
+                orderItem.setPrice(resultSet.getDouble(5));
+                return orderItem;
+            }
+        }catch (SQLException e){
+            System.out.println("Error while getting OrderItem" + e.getMessage());
+        }
+        return null;
     }
 
 

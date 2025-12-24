@@ -57,10 +57,10 @@ public class OrderService {
         return null;
     }
 
-    public void changeOrderTotalPrice(double totalPrice) {
+    public void updateOrder(Order order) {
         String query = "UPDATE orders SET total_price = ? WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setDouble(1, totalPrice);
+            preparedStatement.setDouble(1, order.getTotalPrice());
             preparedStatement.executeUpdate();
         }catch (SQLException e){
             System.out.println("Error changing order to total price" + e.getMessage());

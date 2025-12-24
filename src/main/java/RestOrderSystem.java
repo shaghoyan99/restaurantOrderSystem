@@ -20,7 +20,7 @@ public class RestOrderSystem implements Commands {
     private static final Scanner scanner = new Scanner(System.in);
     private static final OrderService orderService = new OrderService();
     private static final DishService dishService = new DishService();
-    private static final OrderItemService  orderItemService = new OrderItemService();
+    private static final OrderItemService orderItemService = new OrderItemService();
 
 
     public static void main(String[] args) {
@@ -70,13 +70,22 @@ public class RestOrderSystem implements Commands {
             }
             orderService.changeOrderStatus(orderById);
             System.out.println("Status updated to: " + orderById.getStatus());
-        }else {
+        } else {
             System.out.println("Orders is empty!");
         }
     }
 
     private static void printOrderInformation() {
-
+        List<Order> orders = orderService.getOrders();
+        if (!orders.isEmpty()) {
+            System.out.println("Please input order id: ");
+            System.out.println(orders);
+            int orderId = Integer.parseInt(scanner.nextLine());
+            Order orderById = orderService.getOrderById(orderId);
+            OrderItem orderItem = orderItemService.getOrderItem(orderId);
+            System.out.println("Order information: " + orderById);
+            System.out.println("Item: " + orderItem);
+        }
     }
 
     private static void printAllOrderByCustomer() {
@@ -84,10 +93,10 @@ public class RestOrderSystem implements Commands {
         if (!allCustomers.isEmpty()) {
             System.out.println("Please enter the customer id:");
             System.out.println(allCustomers);
-            int customerId  = Integer.parseInt(scanner.nextLine());
+            int customerId = Integer.parseInt(scanner.nextLine());
             List<Order> ordersByCustomer = orderService.getOrdersByCustomer(allCustomers.get(customerId));
             System.out.println(ordersByCustomer);
-        }else {
+        } else {
             System.out.println("No customer found");
         }
     }
@@ -96,7 +105,7 @@ public class RestOrderSystem implements Commands {
         List<Order> orders = orderService.getOrders();
         if (!orders.isEmpty()) {
             System.out.println(orders);
-        }else  {
+        } else {
             System.out.println("No orders found");
         }
     }
@@ -111,22 +120,30 @@ public class RestOrderSystem implements Commands {
             Order order = new Order();
             order.setCustomer(customerService.getCustomerById(customerId));
             order.setTotalPrice(0);
-            order.setStatus(Status.PENDING);
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(orderService.addOrder(order));
-            System.out.println("Please input dish id: ");
-            int dishId = Integer.parseInt(scanner.nextLine());
-            Dish dishById = dishService.getDishById(dishId);
-            orderItem.setDish(dishById);
-            System.out.println("Please input quantity: ");
-            int quantity = Integer.parseInt(scanner.nextLine());
-            orderItem.setQuantity(quantity);
-            orderItem.setPrice(dishById.getPrice());
-            orderItemService.addOrderItem(orderItem);
-            double totalPrice = quantity * orderItem.getPrice();
-            orderService.changeOrderTotalPrice(totalPrice);
-            System.out.println("Order has been created");
-        }else {
+            boolean addMore = true;
+            double totalPrice = 0;
+            while (addMore) {
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder(orderService.addOrder(order));
+                System.out.println("Please input dish id: ");
+                int dishId = Integer.parseInt(scanner.nextLine());
+                Dish dishById = dishService.getDishById(dishId);
+                orderItem.setDish(dishById);
+                System.out.println("Please input quantity: ");
+                int quantity = Integer.parseInt(scanner.nextLine());
+                orderItem.setQuantity(quantity);
+                orderItem.setPrice(dishById.getPrice());
+                orderItemService.addOrderItem(orderItem);
+                totalPrice += (quantity * dishById.getPrice());
+                System.out.println("Do you want to add another dish? y/n");
+                if (scanner.nextLine().equalsIgnoreCase("n")) {
+                    addMore = false;
+                }
+            }
+            order.setTotalPrice(totalPrice);
+            orderService.updateOrder(order);
+            System.out.println("Order has been added!");
+        } else {
             System.out.println("Customer or Dish not found");
         }
     }
@@ -135,7 +152,7 @@ public class RestOrderSystem implements Commands {
         List<Customer> allCustomers = customerService.getAllCustomers();
         if (!allCustomers.isEmpty()) {
             System.out.println(allCustomers);
-        }else  {
+        } else {
             System.out.println("There are no customers in the system");
         }
     }
