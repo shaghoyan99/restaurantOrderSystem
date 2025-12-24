@@ -14,8 +14,6 @@ import java.sql.Statement;
 public class OrderItemService {
 
     private final Connection connection = DBConnectionProvider.getInstance().getConnection();
-    private final DishService dishService = new DishService();
-    private final OrderService orderService = new OrderService();
 
     public void addOrderItem(OrderItem orderItem) {
         String query = "INSERT INTO order_items (order_id, dish_id,quantity,price) VALUES (?, ?, ?, ?)";
