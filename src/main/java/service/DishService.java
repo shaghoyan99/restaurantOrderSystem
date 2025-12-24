@@ -29,6 +29,7 @@ public class DishService {
             if (resultSet.next()) {
                 dish.setId(resultSet.getInt(1));
             }
+            System.out.println("Dish was added");
         } catch (SQLException e) {
             System.err.println("Error while inserting Dish" + e.getMessage());
         }
@@ -61,6 +62,26 @@ public class DishService {
         }
     }
 
+    public List<Dish> getAllDishes() {
+        List<Dish> dishList = new ArrayList<>();
+        String query = "SELECT * FROM dish";
+        try (Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                Dish dish = new Dish();
+                dish.setId(resultSet.getInt("id"));
+                dish.setName(resultSet.getString("name"));
+                dish.setCategory(Category.valueOf(resultSet.getString("category")));
+                dish.setPrice(resultSet.getDouble("price"));
+                dish.setAvailable(resultSet.getBoolean("available"));
+                dishList.add(dish);
+            }
+            return dishList;
+        }catch (SQLException e){
+            System.err.println("Error while getting Dishes" + e.getMessage());
+        }
+        return dishList;
+    }
 
     public List<Dish> getDishesByCategory(Category category) {
         List<Dish> dishList = new ArrayList<>();

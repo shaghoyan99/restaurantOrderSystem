@@ -1,3 +1,8 @@
+import static model.Category.APPETIZER;
+import static model.Category.DESSERT;
+import static model.Category.DRINK;
+import static model.Category.MAIN;
+
 public interface Commands {
 
     String EXIT = "0";
@@ -13,7 +18,7 @@ public interface Commands {
     String CHANGE_ORDER_STATUS = "10";
     String PRINT_MENU_BY_CATEGORY = "11";
 
-    static void printMainManu (){
+    static void printMainManu() {
         System.out.println("Please input " + EXIT + " for exit.");
         System.out.println("Please input " + ADD_DISH + " for add dish.");
         System.out.println("Please input " + REMOVE_DISH + " for remove dish.");
@@ -28,6 +33,13 @@ public interface Commands {
         System.out.println("Please input " + PRINT_MENU_BY_CATEGORY + " for print menu by category.");
     }
 
+    static void printMenuCategory() {
+        System.out.println("Please select profession ");
+        System.out.println("Please input " + APPETIZER.getCode() + " for " + APPETIZER);
+        System.out.println("Please input " + MAIN.getCode() + " for " + MAIN);
+        System.out.println("Please input " + DESSERT.getCode() + " for " + DESSERT);
+        System.out.println("Please input " + DRINK.getCode() + " for " + DRINK);
+    }
 
 
 }
