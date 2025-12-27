@@ -18,7 +18,7 @@ public class CustomerService {
     public void addCustomer(Customer customer) {
         String sql = "INSERT INTO customer(name,phone,email) VALUES (?,?,?)";
 
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql ,Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, customer.getName());
             preparedStatement.setString(2, customer.getPhone());
             preparedStatement.setString(3, customer.getEmail());
@@ -32,33 +32,10 @@ public class CustomerService {
         }
     }
 
-    public void removeCustomer(Customer customer) {
-        String sql = "DELETE FROM customer WHERE id = ?";
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
-            preparedStatement.setInt(1, customer.getId());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("SQLException: " + e.getMessage());
-            ;
-        }
-    }
-
-    public void changeCustomer(Customer customer) {
-        String sql = "UPDATE customer SET name = ?, phone = ?, email = ? WHERE id = ?";
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);){
-            preparedStatement.setString(1, customer.getName());
-            preparedStatement.setString(2, customer.getPhone());
-            preparedStatement.setString(3, customer.getEmail());
-            preparedStatement.setInt(4, customer.getId());
-        } catch (SQLException e) {
-            System.err.println("SQLException: " + e.getMessage());
-        }
-    }
-
     public List<Customer> getAllCustomers() {
         List<Customer> customerList = new ArrayList<>();
         String sql = "SELECT * FROM customer";
-        try(Statement statement = connection.createStatement();) {
+        try(Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
                 Customer customer = new Customer();
@@ -77,7 +54,7 @@ public class CustomerService {
 
     public Customer getCustomerById(int id) {
         String sql = "SELECT * FROM customer WHERE id = ?";
-        try(PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {

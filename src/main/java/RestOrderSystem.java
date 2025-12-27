@@ -1,3 +1,4 @@
+import exception.WrongEmailException;
 import model.Category;
 import model.Customer;
 import model.Dish;
@@ -50,8 +51,15 @@ public class RestOrderSystem implements Commands {
     private static void printRestaurantMenuByCategory() {
         Commands.printMenuCategory();
         String category = scanner.nextLine();
-        List<Dish> dishesByCategory = dishService.getDishesByCategory(Category.valueOf(category));
-        System.out.println(dishesByCategory);
+        List<Dish> dishesByCategory = dishService.getDishesByCategory(Category.getCategoryByCode(category));
+        if (!dishesByCategory.isEmpty()) {
+            for (Dish dish : dishesByCategory) {
+                System.out.println(dish);
+            }
+        }else {
+            System.out.println("No dishes found by category: " + Category.getCategoryByCode(category));
+        }
+
     }
 
     private static void updateOrderStatus() {
@@ -79,7 +87,7 @@ public class RestOrderSystem implements Commands {
         List<Order> orders = orderService.getOrders();
         if (!orders.isEmpty()) {
             System.out.println("Please input order id: ");
-            System.out.println(orders);
+            printAllOrders();
             int orderId = Integer.parseInt(scanner.nextLine());
             Order orderById = orderService.getOrderById(orderId);
             OrderItem orderItem = orderItemService.getOrderItem(orderId);
@@ -95,7 +103,9 @@ public class RestOrderSystem implements Commands {
             System.out.println(allCustomers);
             int customerId = Integer.parseInt(scanner.nextLine());
             List<Order> ordersByCustomer = orderService.getOrdersByCustomer(allCustomers.get(customerId));
-            System.out.println(ordersByCustomer);
+            for (Order order : ordersByCustomer) {
+                System.out.println(order);
+            }
         } else {
             System.out.println("No customer found");
         }
@@ -104,27 +114,43 @@ public class RestOrderSystem implements Commands {
     private static void printAllOrders() {
         List<Order> orders = orderService.getOrders();
         if (!orders.isEmpty()) {
-            System.out.println(orders);
+            for (Order order : orders) {
+                System.out.println(order);
+            }
         } else {
             System.out.println("No orders found");
+        }
+    }
+
+    private static void printDishes() {
+        List<Dish> dishes = dishService.getAllDishes();
+        if (!dishes.isEmpty()) {
+            for (Dish dish : dishes) {
+                System.out.println(dish);
+            }
+        }else  {
+            System.out.println("No dishes found");
         }
     }
 
     private static void creatNewOrder() {
         List<Customer> allCustomers = customerService.getAllCustomers();
         List<Dish> allDishes = dishService.getAllDishes();
-        if (!allCustomers.isEmpty() || !allDishes.isEmpty()) {
-            System.out.println(allCustomers);
+        if (!allCustomers.isEmpty() && !allDishes.isEmpty()) {
             System.out.println("Please enter the customer ID");
+            printCustomers();
             int customerId = Integer.parseInt(scanner.nextLine());
             Order order = new Order();
             order.setCustomer(customerService.getCustomerById(customerId));
             order.setTotalPrice(0);
+            order.setStatus(Status.PENDING);
+            order = orderService.addOrder(order);
             boolean addMore = true;
             double totalPrice = 0;
             while (addMore) {
                 OrderItem orderItem = new OrderItem();
-                orderItem.setOrder(orderService.addOrder(order));
+                orderItem.setOrder(order);
+                printDishes();
                 System.out.println("Please input dish id: ");
                 int dishId = Integer.parseInt(scanner.nextLine());
                 Dish dishById = dishService.getDishById(dishId);
@@ -151,7 +177,9 @@ public class RestOrderSystem implements Commands {
     private static void printCustomers() {
         List<Customer> allCustomers = customerService.getAllCustomers();
         if (!allCustomers.isEmpty()) {
-            System.out.println(allCustomers);
+            for (Customer customer : allCustomers) {
+                System.out.println(customer);
+            }
         } else {
             System.out.println("There are no customers in the system");
         }
@@ -171,7 +199,7 @@ public class RestOrderSystem implements Commands {
             try {
                 CheckEmailUtil.isValidEmail(email);
                 isEmailValid = true;
-            } catch (IllegalArgumentException e) {
+            } catch (WrongEmailException e) {
                 System.out.println(e.getMessage());
             }
         } while (!isEmailValid);

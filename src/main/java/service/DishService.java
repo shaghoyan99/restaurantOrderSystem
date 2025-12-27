@@ -19,7 +19,7 @@ public class DishService {
     public void addDish(Dish dish) {
         String query = "INSERT INTO dish (name, category, price, available) VALUES (?, ?, ?, ?)";
 
-        try(PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, dish.getName());
             preparedStatement.setString(2, dish.getCategory().name());
             preparedStatement.setDouble(3, dish.getPrice());
@@ -50,7 +50,7 @@ public class DishService {
     public void changeDish(Dish dish) {
         String query = "UPDATE dish SET name=?, category=?,price=?, available=? WHERE id=?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query);) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, dish.getName());
             preparedStatement.setString(2, dish.getCategory().name());
             preparedStatement.setDouble(3, dish.getPrice());
@@ -62,19 +62,23 @@ public class DishService {
         }
     }
 
+    private Dish createDishObj(ResultSet resultSet) throws SQLException {
+        Dish dish = new Dish();
+        dish.setId(resultSet.getInt("id"));
+        dish.setName(resultSet.getString("name"));
+        dish.setCategory(Category.valueOf(resultSet.getString("category")));
+        dish.setPrice(resultSet.getDouble("price"));
+        dish.setAvailable(resultSet.getBoolean("available"));
+        return dish;
+    }
+
     public List<Dish> getAllDishes() {
         List<Dish> dishList = new ArrayList<>();
         String query = "SELECT * FROM dish";
         try (Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
-                Dish dish = new Dish();
-                dish.setId(resultSet.getInt("id"));
-                dish.setName(resultSet.getString("name"));
-                dish.setCategory(Category.valueOf(resultSet.getString("category")));
-                dish.setPrice(resultSet.getDouble("price"));
-                dish.setAvailable(resultSet.getBoolean("available"));
-                dishList.add(dish);
+                dishList.add(createDishObj(resultSet));
             }
             return dishList;
         }catch (SQLException e){
@@ -106,18 +110,11 @@ public class DishService {
 
     public Dish getDishById(int id) {
         String query = "SELECT * FROM dish WHERE id = ?";
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query);) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                Dish dish = new Dish();
-                dish.setId(resultSet.getInt("id"));
-                dish.setName(resultSet.getString("name"));
-                dish.setCategory(Category.valueOf("email"));
-                dish.setPrice(resultSet.getDouble("price"));
-                dish.setAvailable(resultSet.getBoolean("available"));
-                return dish;
+               return createDishObj(resultSet);
             }
         } catch (SQLException e) {
             System.err.println("Error while getting Dish" + e.getMessage());

@@ -1,6 +1,5 @@
 package model;
 
-import exception.StatusNotFoundException;
 import lombok.Getter;
 
 @Getter
@@ -15,15 +14,6 @@ public enum Status {
 
     Status(String code) {
         this.code = code;
-    }
-
-    public static Status getStatusByCode(String code) {
-        for (Status value : Status.values() ) {
-            if (value.getCode().equals(code)) {
-                return value;
-            }
-        }
-        throw new StatusNotFoundException("Status with code " + code + " not found");
     }
 
 }

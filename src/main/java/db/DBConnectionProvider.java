@@ -9,12 +9,9 @@ import java.sql.SQLException;
 public class DBConnectionProvider {
 
     @Getter
-    private static DBConnectionProvider instance = new DBConnectionProvider();
+    private static final DBConnectionProvider instance = new DBConnectionProvider();
     private Connection connection;
 
-    private final String JDBC_URL = "jdbc:mysql://localhost:3306/restaurantOrderSystem";
-    private final String JDBC_USERNAME = "root";
-    private final String JDBC_PASSWORD = "root";
 
     private DBConnectionProvider() {
         try {
@@ -26,9 +23,12 @@ public class DBConnectionProvider {
 
     public Connection getConnection() {
         try {
-            if (connection == null || connection.isClosed()) {}
-            connection = DriverManager.getConnection(JDBC_URL,JDBC_USERNAME,JDBC_PASSWORD);
-
+            if (connection == null || connection.isClosed()) {
+                String JDBC_URL = "jdbc:mysql://localhost:3306/restaurantOrderSystem";
+                String JDBC_USERNAME = "root";
+                String JDBC_PASSWORD = "root";
+                connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
+            }
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
         }

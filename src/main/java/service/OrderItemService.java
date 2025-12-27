@@ -1,8 +1,6 @@
 package service;
 
 import db.DBConnectionProvider;
-import model.Dish;
-import model.Order;
 import model.OrderItem;
 
 import java.sql.Connection;
@@ -18,7 +16,7 @@ public class OrderItemService {
     private final OrderService orderService = new OrderService();
 
     public void addOrderItem(OrderItem orderItem) {
-        String query = "INSERT INTO order_items (order_id, dish_id,quantity,price) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO order_item (order_id, dish_id,quantity,price) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setInt(1, orderItem.getOrder().getId());
@@ -36,9 +34,10 @@ public class OrderItemService {
     }
 
     public OrderItem getOrderItem(int orderId) {
-        String query = "SELECT * FROM order_items WHERE order_id = ?";
-        try (Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(query);
+        String query = "SELECT * FROM order_item WHERE order_id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, orderId);
+            ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 OrderItem orderItem = new OrderItem();
                 orderItem.setId(resultSet.getInt(1));

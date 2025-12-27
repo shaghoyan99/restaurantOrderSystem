@@ -2,9 +2,6 @@ import static model.Category.APPETIZER;
 import static model.Category.DESSERT;
 import static model.Category.DRINK;
 import static model.Category.MAIN;
-import static model.Status.DELIVERED;
-import static model.Status.PREPARING;
-import static model.Status.READY;
 
 public interface Commands {
 
@@ -27,7 +24,7 @@ public interface Commands {
         System.out.println("Please input " + REMOVE_DISH + " for remove dish.");
         System.out.println("Please input " + CHANGE_DISH + " for change dish.");
         System.out.println("Please input " + ADD_CUSTOMER + " for add customer.");
-        System.out.println("Please input " + PRINT_CUSTOMERS + " for print customer.");
+        System.out.println("Please input " + PRINT_CUSTOMERS + " for print customers.");
         System.out.println("Please input " + CREAT_NEW_ORDER + " for create new order.");
         System.out.println("Please input " + PRINT_ALL_ORDERS + " for print all orders.");
         System.out.println("Please input " + PRINT_ALL_ORDERS_BY_CUSTOMER + " for print all orders by customer.");
@@ -37,7 +34,7 @@ public interface Commands {
     }
 
     static void printMenuCategory() {
-        System.out.println("Please select profession ");
+        System.out.println("Please select category ");
         System.out.println("Please input " + APPETIZER.getCode() + " for " + APPETIZER);
         System.out.println("Please input " + MAIN.getCode() + " for " + MAIN);
         System.out.println("Please input " + DESSERT.getCode() + " for " + DESSERT);
